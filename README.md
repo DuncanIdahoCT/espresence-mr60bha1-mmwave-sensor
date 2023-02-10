@@ -27,7 +27,33 @@ Not all the sensors require an introduction, presence, motion, heartrate... all 
 
 You can see from the ESP captive portal image above that some of the sensors have "internal" template references that look like duplicates. These will only show up in the code or on the debug webtool for the ESP module. I used the publish to template method to be able to have binary and text sensors using state data received to basic sensors from a single UART device component class.
 
-### Installation:
+The presence sensor for example:
+  ```
+  - id: presence_sensor
+    name: "internal_presense_sensor_to_binary_template"
+    internal: true
+    on_value:
+      - binary_sensor.template.publish:
+          id: presence_template
+          state: !lambda return x > 0;
+  ```
+Has a corresponding binary_sensor reference:
+
+  ```
+  - platform: template
+    id: presence_template
+    name: "${room} Presence"
+    device_class: occupancy
+    filters:
+      - delayed_off: 5s
+  ```
+
+The presence sensor is marked as interna: true and given a name to hint at this while the presence binary_sensor is the one that is presented to the integration and has the occupancy device class and proper states
+
+There are surely other ways to get around the issues I was facing but I found this to be clean and easy enough and kept the include.h uart device component code nice and simple.
+
+
+# Installation:
  * Download the C++ header file and copy it (keeping the subfolder paths) into your Home Assistant config/esphome main folder:
 
    ```
