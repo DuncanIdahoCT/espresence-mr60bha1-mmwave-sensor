@@ -74,4 +74,19 @@
   ```
 ## You'll see a good amount of initialization and status messages from the radar and it will update the sensor states in HA also... even if you have no actual human activity, then it will return to idle and a 1/m heartbeat message
 
+## After a fresh install (compile and flash of the ESP MCU...) you may want to hit the Reset Radar Module button to initialize the Seeed radar module; the output should look similar to this:
 
+  ```
+  11:48:12	[D]	[button:013]	'Reset Radar Module: ' Pressed.
+  11:48:14	[D]	[text_sensor:067]	' Respiratory State': Sending state 'detecting'
+  11:48:19	[D]	[binary_sensor:036]	' Presence': Sending state OFF
+  11:48:26	[D]	[binary_sensor:036]	' Presence': Sending state ON
+  11:48:26	[D]	[binary_sensor:036]	' Motion': Sending state OFF
+  11:48:27	[D]	[text_sensor:067]	' Respiratory State': Sending state 'too low'
+  11:49:05	[D]	[text_sensor:067]	' Respiratory State': Sending state 'detecting'
+  11:49:09	[D]	[binary_sensor:036]	' Presence': Sending state OFF
+  11:49:11	[D]	[text_sensor:067]	' Respiratory State': Sending state 'detecting'
+  ```
+## After this sequence, and assuming no other activity is "visible" to the radar, you should see all the HA sensor states populated with the exception of Heartrate State which is documented in the Seeed protocol tables but doesn't seem to be working quite yet... perhaps with a later version of the module that has newer firmware.
+
+![Seeed 60GHz Protocol Tables](/static/images/60GHz _Protocol1.png)
