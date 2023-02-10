@@ -89,4 +89,4 @@
   ```
 ## After this sequence, and assuming no other activity is "visible" to the radar, you should see all the HA sensor states populated with the exception of Heartrate State which is documented in the Seeed protocol tables but doesn't seem to be working quite yet... perhaps with a later version of the module that has newer firmware.
 
-![Seeed 60GHz Protocol Tables](/static/images/60GHz _Protocol1.png)
+![Seeed 60GHz Protocol Tables](/images/60GHz _Protocol1.png)
