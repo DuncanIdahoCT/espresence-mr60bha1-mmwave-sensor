@@ -23,6 +23,9 @@ Not all the sensors require an introduction, presence, motion, heartrate... all 
    * Respiratory Rate works "as well as" heartrate level, again, I've no way to judge accuracy, I'm just updating the state with the raw data
    * Respiratory State... possibly the most interesting of them all, it starts out as detecting, then could be one of 3 more states: normal, too low, too high. I find this one quite entertaining... and that's probably the only thing you should use it for, entertainment purposes only! lol. I would instead recommend that you just use the actual Resp Rate data and devise your own thresholds that trigger alerts perhaps.  
 
+# Sensor implementation
+
+You can see from the ESP captive portal image above that some of the sensors have "internal" template references that look like duplicates. These will only show up in the code or on the debug webtool for the ESP module. I used the publish to template method to be able to have binary and text sensors using state data received to basic sensors from a single UART device component class.
 
 ### Installation:
  * Download the C++ header file and copy it (keeping the subfolder paths) into your Home Assistant config/esphome main folder:
