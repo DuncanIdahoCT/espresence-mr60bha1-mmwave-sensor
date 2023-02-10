@@ -49,7 +49,7 @@ My first attempts to make one of these Seeed 60GHz mmWave radar sensors work in 
 
      # Enable fallback hotspot (captive portal) in case wifi connection fails
     ap:
-      ssid: "Your-New-Esp-Multi-Sensor"
+      ssid: "espresence-mr60bha1-mmwave-sensor"
      password: "RvZXGuhrPCzl"
 
    captive_portal:
