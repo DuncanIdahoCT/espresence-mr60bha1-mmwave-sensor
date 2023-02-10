@@ -1,6 +1,6 @@
 # Some UART debug fun...
 
-## These are heartbeat messages from the radar module that are received every 1 minute:
+### These are heartbeat messages from the radar module that are received every 1 minute:
 
   ```
   [D][uart_debug:114]: <<< 53,59,01,01,00,01,0F,BE,54,43
@@ -9,7 +9,7 @@
   [D][uart_debug:114]: <<< 53,59,01,01,00,01,0F,BE,54,43
   [D][uart_debug:114]: <<< 53,59,01,01,00,01,0F,BE,54,43
   ```
-## Unlike the Seeed Fall Detection Pro module, the Breathing and Heartbeat radar module is VERY! chatty. So much so in fact, that it becomes hard to find what you're looking for if you're using UART debugging:
+### Unlike the Seeed Fall Detection Pro module, the Breathing and Heartbeat radar module is VERY! chatty. So much so in fact, that it becomes hard to find what you're looking for if you're using UART debugging:
 
   ```
   10:00:24 [0] [uart_debug:158] <<< "SY\x80\x03\x00\x01\x011TC"
@@ -61,9 +61,9 @@
   10:00:36 [0] [uart_debug:158] <<< "SY\x85\x05\x00\x05", )\x81\x81\xes7TC"
   10:00:37 [D] [uart_debug:158] <<< "SY\x80\x03\x00\x01\x011TC" 
   ```
-## You can see that in just a few moments, it's filled the debug output with messages. And of course I had not yet changed the UART debut to output in hex so it was all but impossible to devine what was happening but at least I was able to get messages finally, fo a while, I struggled to see anything before I realized that if you have the UART debug on the ESP set to enable "dummy_receiver" you'll see absolutely nothing so be sure you have that set to false
+### You can see that in just a few moments, it's filled the debug output with messages. And of course I had not yet changed the UART debut to output in hex so it was all but impossible to devine what was happening but at least I was able to get messages finally, fo a while, I struggled to see anything before I realized that if you have the UART debug on the ESP set to enable "dummy_receiver" you'll see absolutely nothing so be sure you have that set to false
 
-## If you're not in front of the radar or just want to try it out, hit the Reset Radar Module button on the sensor web portal or in Home Assistant if you've added it:
+### If you're not in front of the radar or just want to try it out, hit the Reset Radar Module button on the sensor web portal or in Home Assistant if you've added it:
 
   ```
   [D][uart_debug:114]: <<< 53,59,01,01,00,01,0F,BE,54,43
@@ -72,9 +72,9 @@
   [D][uart_debug:114]: >>> 53,59,01,02,00,01,0F,BF,54,43
   [D][uart_debug:114]: <<< 53,59,01,02,00,01,0F,BF,54,43
   ```
-## You'll see a good amount of initialization and status messages from the radar and it will update the sensor states in HA also... even if you have no actual human activity, then it will return to idle and a 1/m heartbeat message
+### You'll see a good amount of initialization and status messages from the radar and it will update the sensor states in HA also... even if you have no actual human activity, then it will return to idle and a 1/m heartbeat message
 
-## After a fresh install (compile and flash of the ESP MCU...) you may want to hit the Reset Radar Module button to initialize the Seeed radar module; the output should look similar to this:
+### After a fresh install (compile and flash of the ESP MCU...) you may want to hit the Reset Radar Module button to initialize the Seeed radar module; the output should look similar to this:
 
   ```
   11:48:12	[D]	[button:013]	'Reset Radar Module: ' Pressed.
@@ -87,6 +87,7 @@
   11:49:09	[D]	[binary_sensor:036]	' Presence': Sending state OFF
   11:49:11	[D]	[text_sensor:067]	' Respiratory State': Sending state 'detecting'
   ```
-## After this sequence, and assuming no other activity is "visible" to the radar, you should see all the HA sensor states populated with the exception of Heartrate State which is documented in the Seeed protocol tables but doesn't seem to be working quite yet... perhaps with a later version of the module that has newer firmware.
+### After this sequence, and assuming no other activity is "visible" to the radar, you should see all the HA sensor states populated with the exception of Heartrate State which is documented in the Seeed protocol tables but doesn't seem to be working quite yet... perhaps with a later version of the module that has newer firmware.
 
 ![Seeed 60GHz Protocol Tables](/images/60GHz _Protocol1.png)
+![ESPHome Integration](/static/images/HA%20Sensor.png)
