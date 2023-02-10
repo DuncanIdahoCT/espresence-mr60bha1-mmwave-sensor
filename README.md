@@ -9,7 +9,22 @@ Some project notes and data on development testing can be found [here](/static/p
 
 My first attempts to make one of these Seeed 60GHz mmWave radar sensors work in Home Assistant was using MQTT which you can find some examples in my other repos here but the ultimate goal was always to fully enable an ESPHome integration which I've learned is simply more stable on its own, and also more resilient with respect to HA restarts or even power flickers or WiFi issues. The way the HA/ESPHome host taps into the ESP MCU using the API method simply works and you're able to rely on the mature underlying code which is installed onto the MCU when you start out using ESPHome as the base to build your sensors. Using MQTT on Arduino was fun and I learned a lot but this is quite a bit more reliable as a smart home integration with Home Assistant.
 
-## Installation:
+# Sensors explained...
+
+Not all the sensors require an introduction, presence, motion, heartrate... all seem pretty self explanetory but there are some caveats on how I chose to implement them in ESPHome and C++
+
+   * Activity Level is a 0-100 scale representation of just how much movement the sensor is detecting, don't kill the messenger, I have no idea how the sensor determines this
+   * Angles X, Y, and sometimes Z?... yeah, I don't know how to read these, again-I'm just reporting the data to these states. You can find various notes and documentation hints on the Seeed Wiki and in their forums. The, so called, "upper computer" software also may hint how to read this data. Note: X and Y seem to update, Z is always zero. So really, never Z lol.
+   * Distance does seem to work ok, the raw data from the sensor module is in CM so I'm using a multiplier to show it as 1 decimal Meters
+   * Heartrate Level seems to work fine; I have not tested its effective range or used any other instrument to judge it's accuracy
+   * Heartrate State is a no go. It is in the documented protocol tables and I've asked some Seeed support questions about it but haven't received much of a definitive answer. There is, however, a note in the protocol tables about how "the default is to not... at this time" which I suppose means it's not implemented yet.
+   * Motion is an interesting one; I'm using it as a binary sensor, simply there is or is not motion. However, technically there are 3 states for this (none, stationary, and active) and I'm ignoring none because I can't think of why it’s even there given there is a separate dedicated presence function. Therefore, I'm mapping active and stationary to 1, and 0 respectively.
+   * Presence is just a perfect binary status byte 1 or 0, present, not present.
+   * Respiratory Rate works "as well as" heartrate level, again, I've no way to judge accuracy, I'm just updating the state with the raw data
+   * Respiratory State... possibly the most interesting of them all, it starts out as detecting, then could be one of 3 more states: normal, too low, too high. I find this one quite entertaining... and that's probably the only thing you should use it for, entertainment purposes only! lol. I would instead recommend that you just use the actual Resp Rate data and devise your own thresholds that trigger alerts perhaps.  
+
+
+### Installation:
  * Download the C++ header file and copy it (keeping the subfolder paths) into your Home Assistant config/esphome main folder:
 
    ```
