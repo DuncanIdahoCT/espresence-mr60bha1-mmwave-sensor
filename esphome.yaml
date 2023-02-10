@@ -1,0 +1,186 @@
+substitutions:
+  # change device name to match your desired name
+  device_name: "esp-mmwave-60ghz-test"
+  # change sensor name below to the one you want to see in Home Assistant
+  device_name_pretty: ESP mmWave 60 gHz Test
+  # change room name below to the one you want to see in Home Assistant
+  room: ""
+  # change the below to be your WiFi SSID
+  ssid: !secret wifi_ssid
+  # change the below to be your WiFi password
+  wifi_password: !secret wifi_password
+  # UART TX Pin
+  uart_tx_pin: GPIO17
+  # UART RX Pin
+  uart_rx_pin: GPIO16
+  # Distance sensor multiplier to express meters instead of centimeters
+  distance_multiplier: ".01"
+
+esphome:
+  name: $device_name
+  includes:
+    - header/esp-mmwave-60ghz-sensor.h
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  logs:
+    sensor: INFO # reduced logging to minimize web_server target overload..
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "your_key"
+
+ota:
+  password: "your_pass"
+
+# Connect to WiFi & create captive portal and web server
+wifi:
+  ssid: "${ssid}"
+  password: "${wifi_password}"
+  use_address: xxx.xxx.xxx.xxx
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${device_name}"
+    password: "${wifi_password}"
+  #manual_ip:
+    # Set this to the IP of the ESP
+    #static_ip: xxx.xxx.xxx.xxx
+    # Set this to the IP address of the router. Often ends with .1
+    #gateway: xxx.xxx.xxx.xxx
+    # The subnet of the network. 255.255.255.0 works for most home networks.
+    #subnet: xxx.xxx.xxx.xxx
+
+captive_portal:
+
+web_server:
+  port: 80
+  version: 2
+  include_internal: true
+
+http_request:
+  useragent: esphome/$device_name
+  timeout: 2s
+  
+uart:
+  id: uart_bus
+  tx_pin: ${uart_tx_pin}
+  rx_pin: ${uart_rx_pin}
+  baud_rate: 115200
+#  debug:
+#    direction: BOTH
+#    dummy_receiver: false # enabling this, prevents UART byte read in main program, use only for debugging of raw frames and pin assignments
+#    sequence:
+#      - lambda: UARTDebug::log_hex(direction, bytes, ',');
+
+sensor:
+  - platform: custom
+    lambda: |-
+      auto my_sensor = new UARTSensor(id(uart_bus)); 
+      App.register_component(my_sensor);
+      return {my_sensor->heartstate_sensor, my_sensor->heartrate_sensor, my_sensor->respstate_sensor, my_sensor->resprate_sensor, my_sensor->activity_sensor, my_sensor->distance_sensor, my_sensor->angle_x_sensor, my_sensor->angle_y_sensor, my_sensor->angle_z_sensor, my_sensor->presence_sensor, my_sensor->motion_sensor};
+  
+    sensors:
+      - name: "${room} Heartrate State"
+        state_class: measurement
+      - name: "${room} Heartrate Level"
+        state_class: measurement
+      - id: respstate_sensor
+        name: "internal_respstate_sensor_to_text_template"
+        internal: true
+        on_value_range:
+          - above: 3.5
+            below: 4.5
+            then:
+            - text_sensor.template.publish:
+                id: respstate_template
+                state: !lambda return "detecting";
+          - above: 2.5
+            below: 3.5
+            then:
+            - text_sensor.template.publish:
+                id: respstate_template
+                state: !lambda return "too low";
+          - above: 1.5
+            below: 2.5
+            then:
+            - text_sensor.template.publish:
+                id: respstate_template
+                state: !lambda return "too high";
+          - above: 0.5
+            below: 1.5
+            then:
+            - text_sensor.template.publish:
+                id: respstate_template
+                state: !lambda return "normal";
+          - below: 0.5
+            then:
+            - text_sensor.template.publish:
+                id: respstate_template
+                state: !lambda return "none";
+      - name: "${room} Respiratory Rate"
+        state_class: measurement
+      - name: "${room} Activity Level"
+        state_class: measurement
+      - name: "${room} Distance (Meters)"
+        state_class: measurement
+        accuracy_decimals: 1
+        filters:
+          multiply: ${distance_multiplier}
+      - name: "${room} Angle X:"
+        state_class: measurement
+      - name: "${room} Angle Y:"
+        state_class: measurement
+      - name: "${room} Angle Z:"
+        state_class: measurement
+      - id: presence_sensor
+        name: "internal_presense_sensor_to_binary_template"
+        internal: true
+        on_value:
+          - binary_sensor.template.publish:
+              id: presence_template
+              state: !lambda return x > 0;
+      - id: motion_sensor
+        name: "internal_motion_sensor_to_binary_template"
+        internal: true
+        on_value:
+          - binary_sensor.template.publish:
+              id: motion_template
+              state: !lambda return x > 0;
+button:
+  - platform: restart
+    name: "Restart MCU: ${room}"
+    entity_category: diagnostic
+    on_press:
+      - uart.write:
+          id: uart_bus
+          data: "resetSystem 0"
+  - platform: template
+    name: "Reset Radar Module: ${room}"
+    id: reset_radar_module
+    entity_category: diagnostic
+    on_press:
+      - uart.write: [0x53, 0x59, 0x01, 0x02, 0x00, 0x01, 0x0F, 0xBF, 0x54, 0x43]
+
+binary_sensor:
+  - platform: template
+    id: presence_template
+    name: "${room} Presence"
+    device_class: occupancy
+    filters:
+      - delayed_off: 5s
+  - platform: template
+    id: motion_template
+    name: "${room} Motion"
+    device_class: motion
+
+text_sensor:
+  - platform: template
+    id: respstate_template
+    name: "${room} Respiratory State"
