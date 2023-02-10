@@ -3,6 +3,8 @@ Home Assistant / ESPHome Integration for the Seeed Studio 60GHz mmWave Breathing
 
 ![ESPHome Integration](/static/images/HA%20Sensor.png)
 
+Some project notes and data on development testing can be found [here](/static/project.md)!
+
 My first attempts to make one of these Seeed 60GHz mmWave radar sensors work in Home Assistant was using MQTT which you can find some examples in my other repos here but the ultimate goal was always to fully enable an ESPHome integration which I've learned is simply more stable on its own, and also more resilient with respect to HA restarts or even power flickers or WiFi issues. The way the HA/ESPHome host taps into the ESP MCU using the API method simply works and you're able to rely on the mature underlying code which is installed onto the MCU when you start out using ESPHome as the base to build your sensors. Using MQTT on Arduino was fun and I learned a lot but this is quite a bit more reliable as a smart home integration with Home Assistant.
 
 ## Installation:
