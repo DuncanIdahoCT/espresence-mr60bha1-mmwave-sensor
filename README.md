@@ -11,7 +11,7 @@ My first attempts to make one of these Seeed 60GHz mmWave radar sensors work in 
 
 # Sensors explained...
 
-Not all the sensors require an introduction, presence, motion, heartrate... all seem pretty self explanetory but there are some caveats on how I chose to implement them in ESPHome and C++
+Not all the sensors require an introduction, presence, motion, heartrate... all seem pretty self explanatory but there are some caveats on how I chose to implement them in ESPHome and C++
 
    * Activity Level is a 0-100 scale representation of just how much movement the sensor is detecting, don't kill the messenger, I have no idea how the sensor determines this
    * Angles X, Y, and sometimes Z?... yeah, I don't know how to read these, again-I'm just reporting the data to these states. You can find various notes and documentation hints on the Seeed Wiki and in their forums. The, so called, "upper computer" software also may hint how to read this data. Note: X and Y seem to update, Z is always zero. So really, never Z lol.
@@ -48,9 +48,9 @@ Has a corresponding binary_sensor reference:
       - delayed_off: 5s
   ```
 
-The presence sensor is marked as interna: true and given a name to hint at this while the presence binary_sensor is the one that is presented to the integration and has the occupancy device class and proper states
+The presence sensor is marked as internal: true and given a name to hint at this while the presence binary_sensor is the one that is presented to the integration and has the occupancy device class and proper states
 
-There are surely other ways to get around the issues I was facing but I found this to be clean and easy enough and kept the include.h uart device component code nice and simple.
+There are likely other ways to get around the issues I was facing but I found this to be clean and easy enough and kept the include.h uart device component code nice and simple.
 
 
 # Installation:
