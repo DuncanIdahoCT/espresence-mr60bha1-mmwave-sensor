@@ -1,5 +1,12 @@
-# espresence-mr60bha1-mmwave-sensor
+## espresence-mr60bha1-mmwave-sensor
 Home Assistant / ESPHome Integration for the Seeed Studio 60GHz mmWave Breathing and Heartbeat Module
+
+# Now updated as a proper external component as custom components have been deprecated in ESPHome
+
+The change notes from ESPHome:
+https://esphome.io/guides/contributing#a-note-about-custom-components
+
+Notable changes are in the yaml layout and the restructuring of the include/header file to be recognized as a proper python application.
 
 ![ESPHome HA Integration](/static/images/HA%20Sensor.png)
 
@@ -54,11 +61,17 @@ There are likely other ways to get around the issues I was facing but I found th
 
 
 # Installation:
- * Download the C++ header file and copy it (keeping the subfolder paths) into your Home Assistant config/esphome main folder:
+ * Download the external component python, header and source files and copy to your ESPHome root folder keeping relative paths the same to avoid needing to change references:
+ * Note: if you used a previous version of this repo, you can remove the header/esp-mmwave-60ghz-sensor.h file as it's no longer used
 
    ```
-   header/esp-mmwave-60ghz-sensor.h
-   
+   your_esphome_root_folder
+   ├── espresence-mr60bha1-mmwave-sensor.yaml
+   └── external_components
+       └── mr60bha1
+           ├── __init__.py
+           ├── mr60bha1_component.h
+           └── mr60bha1_component.cpp
    ```
  
  * In Home Assistant add-on, click ESPHome>open web gui and create a new device choosing the "continue" option and give it a name such as:
