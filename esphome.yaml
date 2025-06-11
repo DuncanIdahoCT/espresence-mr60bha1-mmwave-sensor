@@ -4,7 +4,7 @@ substitutions:
   # change sensor name below to the one you want to see in Home Assistant
   device_name_pretty: ESP mmWave 60 gHz Test
   # change room name below to the one you want to see in Home Assistant
-  room: ""
+  room: "Test"
   # change the below to be your WiFi SSID
   ssid: !secret wifi_ssid
   # change the below to be your WiFi password
@@ -18,8 +18,6 @@ substitutions:
 
 esphome:
   name: $device_name
-  includes:
-    - header/esp-mmwave-60ghz-sensor.h
 
 esp32:
   board: esp32dev
@@ -37,25 +35,18 @@ api:
     key: "your_key"
 
 ota:
+- platform: esphome
   password: "your_pass"
 
 # Connect to WiFi & create captive portal and web server
 wifi:
   ssid: "${ssid}"
   password: "${wifi_password}"
-  use_address: xxx.xxx.xxx.xxx
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "${device_name}"
     password: "${wifi_password}"
-  #manual_ip:
-    # Set this to the IP of the ESP
-    #static_ip: xxx.xxx.xxx.xxx
-    # Set this to the IP address of the router. Often ends with .1
-    #gateway: xxx.xxx.xxx.xxx
-    # The subnet of the network. 255.255.255.0 works for most home networks.
-    #subnet: xxx.xxx.xxx.xxx
 
 captive_portal:
 
@@ -66,6 +57,7 @@ web_server:
 
 http_request:
   useragent: esphome/$device_name
+  verify_ssl: false
   timeout: 2s
   
 uart:
@@ -79,80 +71,103 @@ uart:
 #    sequence:
 #      - lambda: UARTDebug::log_hex(direction, bytes, ',');
 
+# External components - double-check all your paths!
+#
+# your_esphome_root_folder
+# ├── espresence-mr60bha1-mmwave-sensor.yaml
+# └── external_components
+#     └── mr60bha1
+#         ├── __init__.py
+#         ├── mr60bha1_component.h
+#         └── mr60bha1_component.cpp
+#
+external_components:
+  - source: external_components
+    components: [mr60bha1]
+
 sensor:
-  - platform: custom
-    lambda: |-
-      auto my_sensor = new UARTSensor(id(uart_bus)); 
-      App.register_component(my_sensor);
-      return {my_sensor->heartstate_sensor, my_sensor->heartrate_sensor, my_sensor->respstate_sensor, my_sensor->resprate_sensor, my_sensor->activity_sensor, my_sensor->distance_sensor, my_sensor->angle_x_sensor, my_sensor->angle_y_sensor, my_sensor->angle_z_sensor, my_sensor->presence_sensor, my_sensor->motion_sensor};
+
+mr60bha1:
+    id: my_uart_sensor_instance
+    uart_id: uart_bus
+    heartstate:
+      name: "${room} Heartrate State"
+      state_class: measurement
+    heartrate:
+      name: "${room} Heartrate Level"
+      state_class: measurement
+    respstate:
+      id: respstate_sensor
+      name: "internal_respstate_sensor_to_text_template"
+      internal: true
+      on_value_range:
+        - above: 3.5
+          below: 4.5
+          then:
+          - text_sensor.template.publish:
+              id: respstate_template
+              state: "detecting"
+        - above: 2.5
+          below: 3.5
+          then:
+          - text_sensor.template.publish:
+              id: respstate_template
+              state: "too low"
+        - above: 1.5
+          below: 2.5
+          then:
+          - text_sensor.template.publish:
+              id: respstate_template
+              state: "too high"
+        - above: 0.5
+          below: 1.5
+          then:
+          - text_sensor.template.publish:
+              id: respstate_template
+              state: "normal"
+        - below: 0.5
+          then:
+          - text_sensor.template.publish:
+              id: respstate_template
+              state: "none"
+    resprate:
+      name: "${room} Respiratory Rate"
+      state_class: measurement
+    activity:
+      name: "${room} Activity Level"
+      state_class: measurement
+    distance:
+      name: "${room} Distance (Meters)"
+      state_class: measurement
+      accuracy_decimals: 1
+      filters:
+        multiply: ${distance_multiplier}
+    angle_x:
+      name: "${room} Angle X"
+      state_class: measurement
+    angle_y:
+      name: "${room} Angle Y"
+      state_class: measurement
+    angle_z:
+      name: "${room} Angle Z"
+      state_class: measurement
+    presence:
+      id: presence_sensor
+      name: "internal_presence_sensor_to_binary_template"
+      internal: true
+      on_value:
+        - binary_sensor.template.publish:
+            id: presence_template
+            state: !lambda return x > 0;
+    motion:
+      id: motion_sensor
+      name: "internal_motion_sensor_to_binary_template"
+      internal: true
+      on_value:
+        - binary_sensor.template.publish:
+            id: motion_template
+            state: !lambda return x > 0;
   
-    sensors:
-      - name: "${room} Heartrate State"
-        state_class: measurement
-      - name: "${room} Heartrate Level"
-        state_class: measurement
-      - id: respstate_sensor
-        name: "internal_respstate_sensor_to_text_template"
-        internal: true
-        on_value_range:
-          - above: 3.5
-            below: 4.5
-            then:
-            - text_sensor.template.publish:
-                id: respstate_template
-                state: !lambda return "detecting";
-          - above: 2.5
-            below: 3.5
-            then:
-            - text_sensor.template.publish:
-                id: respstate_template
-                state: !lambda return "too low";
-          - above: 1.5
-            below: 2.5
-            then:
-            - text_sensor.template.publish:
-                id: respstate_template
-                state: !lambda return "too high";
-          - above: 0.5
-            below: 1.5
-            then:
-            - text_sensor.template.publish:
-                id: respstate_template
-                state: !lambda return "normal";
-          - below: 0.5
-            then:
-            - text_sensor.template.publish:
-                id: respstate_template
-                state: !lambda return "none";
-      - name: "${room} Respiratory Rate"
-        state_class: measurement
-      - name: "${room} Activity Level"
-        state_class: measurement
-      - name: "${room} Distance (Meters)"
-        state_class: measurement
-        accuracy_decimals: 1
-        filters:
-          multiply: ${distance_multiplier}
-      - name: "${room} Angle X:"
-        state_class: measurement
-      - name: "${room} Angle Y:"
-        state_class: measurement
-      - name: "${room} Angle Z:"
-        state_class: measurement
-      - id: presence_sensor
-        name: "internal_presense_sensor_to_binary_template"
-        internal: true
-        on_value:
-          - binary_sensor.template.publish:
-              id: presence_template
-              state: !lambda return x > 0;
-      - id: motion_sensor
-        name: "internal_motion_sensor_to_binary_template"
-        internal: true
-        on_value:
-          - binary_sensor.template.publish:
-              id: motion_template
-              state: !lambda return x > 0;
 button:
   - platform: restart
     name: "Restart MCU: ${room}"
