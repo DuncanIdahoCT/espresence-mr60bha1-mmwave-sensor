@@ -1,7 +1,7 @@
 ## espresence-mr60bha1-mmwave-sensor
 Home Assistant / ESPHome Integration for the Seeed Studio 60GHz mmWave Breathing and Heartbeat Module
 
-# Now updated as a proper external component as custom components have been deprecated in ESPHome
+### Now updated as a proper external component as custom components have been deprecated in ESPHome
 
 The change notes from ESPHome:
 https://esphome.io/guides/contributing#a-note-about-custom-components
